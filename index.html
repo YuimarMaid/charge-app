@@ -1,76 +1,85 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>チャージ料金計算</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#e4ab9b">
-<link rel="icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>チャージ料金計算</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f8c8dc">
+  <link rel="icon" href="icon-192.png">
 
-<style>
-@font-face {
-  font-family: "TanukiMagic";
-  src: url("Tanuki-Permanent-Marker.woff2") format("woff2"),
-       url("Tanuki-Permanent-Marker.woff") format("woff");
-  font-weight: normal;
-  font-style: normal;
-}
-body {
-  font-family: "TanukiMagic", system-ui, sans-serif;
-  background-color: rgba(248, 200, 220, 0.8); 
-  padding: 18px;
-}
+  <style>
+    /* フォント読み込み */
+    @font-face {
+      font-family: "TanukiMagic";
+      src: url("Tanuki-Permanent-Marker.woff2") format("woff2"),
+           url("Tanuki-Permanent-Marker.woff") format("woff");
+      font-weight: normal;
+      font-style: normal;
+    }
 
+    body {
+      font-family: system-ui, sans-serif;
+      background-color: rgba(248, 200, 220, 0.8); /* パステルピンク＋透け感 */
+      padding: 18px;
+      text-align: center;
+    }
 
-h2 {
-  position: relative;
-  font-family: "TanukiMagic", cursive, sans-serif;
-  font-size: 40px;
-  font-weight: normal;
-  color: #e75480; 
-}
+    h2 {
+      position: relative;
+      font-family: "TanukiMagic", cursive, sans-serif;
+      font-size: 40px;
+      font-weight: normal;
+      color: #e75480; /* ローズピンク */
+      margin-bottom: 20px;
+    }
 
-h2::before {
-  content: attr(data-text); 
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: -1;
-  color: white;
-  -webkit-text-stroke: 6px white; 
-}
+    h2::before {
+      content: attr(data-text); /* 同じ文字をコピー */
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: -1;
+      color: white;
+      -webkit-text-stroke: 6px white; /* 白い縁取りを外側に */
+    }
 
-  label, input, select, button {
-    display: block;
-    margin: 8px 0;
-    font-size: 16px;
-  }
+    label {
+      display: block;
+      margin: 10px 0;
+      font-size: 18px;
+    }
 
-  button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background-color: #e75480;
-    color: white;
-    font-weight: bold;
-  }
+    input, select, button {
+      margin-top: 6px;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+    }
 
-  .result {
-    margin-top: 12px;
-    font-weight: bold;
-  }
+    button {
+      background-color: #e75480;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      margin-top: 14px;
+    }
 
-  pre {
-    background: #fff;
-    padding: 8px;
-    border-radius: 6px;
-    font-size: 14px;
-  }
-</style>
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <h2>チャージ料金計算</h2>
+  <h2 data-text="チャージ料金計算">チャージ料金計算</h2>
 
   <label>性別
     <select id="gender">
@@ -80,107 +89,104 @@ h2::before {
   </label>
 
   <label>入店時間
-  <input type="time" id="startTime" step="900">
-</label>
+    <input type="time" id="startTime" step="900">
+  </label>
 
-<label>退店時間
-  <input type="time" id="endTime" step="900">
-</label>
+  <label>退店時間
+    <input type="time" id="endTime" step="900">
+  </label>
 
   <button onclick="calculate()">計算する</button>
 
-  <div class="result" id="result">料金: - 円</div>
-  <pre id="breakdown"></pre>
+  <div id="result"></div>
 
-<script>
-function getRates(gender, isBar) {
-  if (gender === "male") {
-    return isBar ? { first30:500, add15:400 } : { first30:400, add15:300 };
-  } else {
-    return isBar ? { first30:500, add15:300 } : { first30:400, add15:200 };
-  }
-}
-
-function parseTimeToDate(t) {
-  return new Date("2000-01-01T" + t + ":00");
-}
-
-function calculate() {
-  const gender = document.getElementById("gender").value;
-  const startStr = document.getElementById("startTime").value;
-  const endStr = document.getElementById("endTime").value;
-  const out = document.getElementById("result");
-  const bd = document.getElementById("breakdown");
-
-  if (!startStr || !endStr) {
-    alert("入店時間と退店時間を入力してください");
-    return;
-  }
-
-  let startDate = parseTimeToDate(startStr);
-  let endDate = parseTimeToDate(endStr);
-  if (endDate <= startDate) endDate.setDate(endDate.getDate() + 1);
-
-  const initialIsBar = startDate.getHours() >= 22;
-  const rates = getRates(gender, initialIsBar);
-  let total = rates.first30;
-  let breakdown = [];
-  breakdown.push(`初回30分（${initialIsBar ? "バー" : "カフェ"}）: ${rates.first30}円`);
-
-  const after30 = new Date(startDate.getTime() + 30*60000);
-
-  let blockStart = new Date(after30);
-  while (blockStart < endDate) {
-    let isBar = blockStart.getHours() >= 22;
-    const rate = getRates(gender, isBar).add15;
-    total += rate;
-    breakdown.push(`${blockStart.getHours().toString().padStart(2,"0")}:${blockStart.getMinutes().toString().padStart(2,"0")}〜 (${isBar ? "バー" : "カフェ"}) ${rate}円`);
-    blockStart = new Date(blockStart.getTime() + 15*60000);
-  }
-
-  out.innerText = `料金: ${total} 円`;
-  bd.innerText = breakdown.join("\n");
-}
-
-// Service Worker 登録
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
-
-  function roundToQuarterHour(date) {
-    let minutes = date.getMinutes();
-    let rounded = Math.round(minutes / 15) * 15;
-    if (rounded === 60) {
-      date.setHours(date.getHours() + 1);
-      rounded = 0;
+  <script>
+    // ✅ 分を必ず 0,15,30,45 に丸める関数
+    function roundToQuarterHour(date) {
+      let minutes = date.getMinutes();
+      let rounded = Math.round(minutes / 15) * 15;
+      if (rounded === 60) {
+        date.setHours(date.getHours() + 1);
+        rounded = 0;
+      }
+      date.setMinutes(rounded);
+      date.setSeconds(0);
+      return date;
     }
-    date.setMinutes(rounded);
-    date.setSeconds(0);
-    return date;
-  }
 
+    // 入力イベントで自動補正
+    document.getElementById("startTime").addEventListener("change", (e) => {
+      let date = new Date(`1970-01-01T${e.target.value}:00`);
+      e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
+    });
 
-  document.getElementById("startTime").addEventListener("change", (e) => {
-    let date = new Date(`1970-01-01T${e.target.value}:00`);
-    e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
-  });
+    document.getElementById("endTime").addEventListener("change", (e) => {
+      let date = new Date(`1970-01-01T${e.target.value}:00`);
+      e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
+    });
 
-  document.getElementById("endTime").addEventListener("change", (e) => {
-    let date = new Date(`1970-01-01T${e.target.value}:00`);
-    e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
-  });
+    // ✅ 計算ロジック
+    function calculate() {
+      const gender = document.getElementById("gender").value;
+      const start = document.getElementById("startTime").value;
+      const end = document.getElementById("endTime").value;
 
-</script>
-  
+      if (!start || !end) {
+        document.getElementById("result").textContent = "時間を入力してください";
+        return;
+      }
+
+      let startDate = new Date(`1970-01-01T${start}:00`);
+      let endDate = new Date(`1970-01-01T${end}:00`);
+      if (endDate <= startDate) {
+        document.getElementById("result").textContent = "退店時間は入店時間より後にしてください";
+        return;
+      }
+
+      // 分を丸める
+      startDate = roundToQuarterHour(startDate);
+      endDate = roundToQuarterHour(endDate);
+
+      let total = 0;
+      const cafeEnd = new Date("1970-01-01T22:00:00");
+
+      // まずカフェタイム
+      if (startDate < cafeEnd) {
+        let cafeExit = endDate < cafeEnd ? endDate : cafeEnd;
+        total += calcCharge(gender, "cafe", startDate, cafeExit);
+        startDate = cafeExit;
+      }
+
+      // 次にバータイム
+      if (endDate > cafeEnd) {
+        total += calcCharge(gender, "bar", startDate, endDate);
+      }
+
+      document.getElementById("result").textContent = `合計料金: ${total} 円`;
+    }
+
+    function calcCharge(gender, timeType, start, end) {
+      let minutes = (end - start) / 1000 / 60;
+      if (minutes <= 0) return 0;
+
+      let first30 = (timeType === "cafe")
+        ? 400
+        : 500;
+
+      let extendFee = (gender === "male")
+        ? (timeType === "cafe" ? 300 : 400)
+        : (timeType === "cafe" ? 200 : 300);
+
+      let total = first30;
+      minutes -= 30;
+
+      if (minutes > 0) {
+        let units = Math.ceil(minutes / 15);
+        total += units * extendFee;
+      }
+
+      return total;
+    }
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
