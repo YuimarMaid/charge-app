@@ -10,35 +10,30 @@
 
 <style>
   /* フォントを読み込む（tanuki-magic.woff を同じフォルダに置いてください） */
- @font-face {
+@font-face {
   font-family: "TanukiMagic";
   src: url("tanuki-magic.woff2") format("woff2"),
        url("tanuki-magic.woff") format("woff");
   font-weight: normal;
   font-style: normal;
 }
- body {
-  font-family: system-ui, sans-serif;
-  background-color: #ffd1dc;
+body {
+  font-family: "TanukiMagic", system-ui, sans-serif;
+  background-color: rgba(248, 200, 220, 0.8); 
   padding: 18px;
 }
 
 
 h2 {
-  font-family: "TanukiMagic", cursive;
-  color: #e75480; /* ローズピンク */
-  font-size: 36px;
-  font-weight: normal;
-
-  /* 縁取り → 半分の太さ */
+  font-family: "TanukiMagic", cursive, sans-serif;
+  color: #e75480; 
   -webkit-text-stroke: 1px white;
-
-  /* 疑似太字 → text-shadowを内側っぽく重ねる */
   text-shadow: 
     0.5px 0 0 #e75480,
    -0.5px 0 0 #e75480,
     0 0.5px 0 #e75480,
     0 -0.5px 0 #e75480;
+  font-size: 36px;
 }
 
   label, input, select, button {
@@ -149,6 +144,7 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
 
