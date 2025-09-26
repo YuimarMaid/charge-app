@@ -10,18 +10,18 @@
 
 <style>
   /* フォントを読み込む（tanuki-magic.woff を同じフォルダに置いてください） */
-  @font-face {
-    font-family: "TanukiMagic";
-    src: url("tanuki-magic.woff") format("woff");
-    font-weight: normal;
-    font-style: normal;
-  }
-
-  body {
-    font-family: system-ui, sans-serif;
-    background-color: #e4ab9b; /* 石竹色 */
-    padding: 18px;
-  }
+ @font-face {
+  font-family: "TanukiMagic";
+  src: url("tanuki-magic.woff2") format("woff2"),
+       url("tanuki-magic.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+ body {
+  font-family: system-ui, sans-serif;
+  background-color: #de6fa1; /* チャイニーズピンク */
+  padding: 18px;
+}
 
 h2 {
   font-family: "TanukiMagic", cursive;
@@ -148,5 +148,6 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
 
