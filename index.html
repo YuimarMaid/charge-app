@@ -26,14 +26,14 @@
     }
 
     h2 {
-      position: relative;
-      font-family: "TanukiMagic", cursive, sans-serif;
-      font-size: 40px;
-      font-weight: normal;
-      color: #e75480; /* ピンク文字 */
-      display: inline-block;
-      margin-bottom: 20px;
-    }
+  font-family: "TanukiMagic", cursive, sans-serif;
+  font-size: 40px;
+  font-weight: normal;
+  color: #e75480; /* ピンク */
+  -webkit-text-stroke: 2px white; /* 外側に白フチ */
+  margin-bottom: 20px;
+}
+
 
     h2::before {
       content: attr(data-text);
@@ -62,3 +62,4 @@
     button {
       background-color: #e75480;
       color: white
+
