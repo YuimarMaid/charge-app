@@ -20,29 +20,18 @@
 
     body {
       font-family: system-ui, sans-serif;
-      background-color: rgba(248, 200, 220, 0.8); /* パステルピンク＋透け感 */
+      background-color: rgba(248, 200, 220, 0.8); /* 薄いピンク＋透け感 */
       padding: 18px;
       text-align: center;
     }
 
     h2 {
-  font-family: "TanukiMagic", cursive, sans-serif;
-  font-size: 40px;
-  font-weight: normal;
-  color: #e75480; /* ピンク */
-  -webkit-text-stroke: 2px white; /* 外側に白フチ */
-  margin-bottom: 20px;
-}
-
-
-    h2::before {
-      content: attr(data-text);
-      position: absolute;
-      left: 0;
-      top: 0;
-      z-index: -1;
-      color: white;
-      -webkit-text-stroke: 6px white; /* 外側に白フチ */
+      font-family: "TanukiMagic", cursive, sans-serif;
+      font-size: 40px;
+      font-weight: normal;
+      color: #e75480; /* ピンク文字 */
+      -webkit-text-stroke: 2px white; /* 白いフチ */
+      margin-bottom: 20px;
     }
 
     label {
@@ -61,5 +50,133 @@
 
     button {
       background-color: #e75480;
-      color: white
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      margin-top: 14px;
+    }
 
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h2>チャージ料金計算</h2>
+
+  <label>性別
+    <select id="gender">
+      <option value="male">男性</option>
+      <option value="female">女性</option>
+    </select>
+  </label>
+
+  <label>入店時間
+    <input type="time" id="startTime" step="900">
+  </label>
+
+  <label>退店時間
+    <input type="time" id="endTime" step="900">
+  </label>
+
+  <button onclick="calculate()">計算する</button>
+
+  <div id="result"></div>
+
+  <script>
+    // ✅ 分を必ず 0,15,30,45 に丸める関数
+    function roundToQuarterHour(date) {
+      let minutes = date.getMinutes();
+      let rounded = Math.round(minutes / 15) * 15;
+      if (rounded === 60) {
+        date.setHours(date.getHours() + 1);
+        rounded = 0;
+      }
+      date.setMinutes(rounded);
+      date.setSeconds(0);
+      return date;
+    }
+
+    // 入力イベントで自動補正（常に 0,15,30,45 にする）
+    function attachRounder(id) {
+      document.getElementById(id).addEventListener("change", (e) => {
+        if (!e.target.value) return;
+        let date = new Date(`1970-01-01T${e.target.value}:00`);
+        e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
+      });
+    }
+    attachRounder("startTime");
+    attachRounder("endTime");
+
+    // ✅ 計算ロジック
+    function calculate() {
+      const gender = document.getElementById("gender").value;
+      const start = document.getElementById("startTime").value;
+      const end = document.getElementById("endTime").value;
+
+      if (!start || !end) {
+        document.getElementById("result").textContent = "時間を入力してください";
+        return;
+      }
+
+      let startDate = new Date(`1970-01-01T${start}:00`);
+      let endDate = new Date(`1970-01-01T${end}:00`);
+      if (endDate <= startDate) {
+        document.getElementById("result").textContent = "退店時間は入店時間より後にしてください";
+        return;
+      }
+
+      // 分を丸める
+      startDate = roundToQuarterHour(startDate);
+      endDate = roundToQuarterHour(endDate);
+
+      let total = 0;
+      const cafeEnd = new Date("1970-01-01T22:00:00");
+
+      // まずカフェタイム
+      if (startDate < cafeEnd) {
+        let cafeExit = endDate < cafeEnd ? endDate : cafeEnd;
+        total += calcCharge(gender, "cafe", startDate, cafeExit);
+        startDate = cafeExit;
+      }
+
+      // 次にバータイム
+      if (endDate > cafeEnd) {
+        total += calcCharge(gender, "bar", startDate, endDate);
+      }
+
+      document.getElementById("result").textContent = `合計料金: ${total} 円`;
+    }
+
+    function calcCharge(gender, timeType, start, end) {
+      let minutes = (end - start) / 1000 / 60;
+      if (minutes <= 0) return 0;
+
+      let first30 = (timeType === "cafe")
+        ? 400
+        : 500;
+
+      let extendFee = (gender === "male")
+        ? (timeType === "cafe" ? 300 : 400)
+        : (timeType === "cafe" ? 200 : 300);
+
+      let total = first30;
+      minutes -= 30;
+
+      if (minutes > 0) {
+        let units = Math.ceil(minutes / 15);
+        total += units * extendFee;
+      }
+
+      return total;
+    }
+  </script>
+</body>
+</html>
