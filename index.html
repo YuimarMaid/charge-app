@@ -3,12 +3,60 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>チャージ料金計算（5400円ルール版）</title>
+<title>チャージ料金計算</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e4ab9b">
+<link rel="icon" href="icon-192.png">
+
 <style>
-  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN";padding:18px}
-  label,input,select,button{display:block;margin:8px 0;font-size:16px}
-  .result{margin-top:12px;font-weight:bold}
-  pre{background:#f6f6f6;padding:8px;border-radius:6px}
+  /* フォントを読み込む（tanuki-magic.woff を同じフォルダに置いてください） */
+  @font-face {
+    font-family: "TanukiMagic";
+    src: url("tanuki-magic.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  body {
+    font-family: system-ui, sans-serif;
+    background-color: #e4ab9b; /* 石竹色 */
+    padding: 18px;
+  }
+
+  h2 {
+    font-family: "TanukiMagic", cursive;
+    color: #e75480; /* ローズピンク */
+    -webkit-text-stroke: 2px white; /* 白ふち */
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  label, input, select, button {
+    display: block;
+    margin: 8px 0;
+    font-size: 16px;
+  }
+
+  button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #e75480;
+    color: white;
+    font-weight: bold;
+  }
+
+  .result {
+    margin-top: 12px;
+    font-weight: bold;
+  }
+
+  pre {
+    background: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
@@ -22,11 +70,11 @@
   </label>
 
   <label>入店時間
-    <input type="time" id="startTime">
+    <input type="time" id="startTime" step="900">
   </label>
 
   <label>退店時間
-    <input type="time" id="endTime">
+    <input type="time" id="endTime" step="900">
   </label>
 
   <button onclick="calculate()">計算する</button>
@@ -61,9 +109,8 @@ function calculate() {
 
   let startDate = parseTimeToDate(startStr);
   let endDate = parseTimeToDate(endStr);
-  if (endDate <= startDate) endDate.setDate(endDate.getDate() + 1); // 日跨ぎ対応
+  if (endDate <= startDate) endDate.setDate(endDate.getDate() + 1);
 
-  // 最初の30分
   const initialIsBar = startDate.getHours() >= 22;
   const rates = getRates(gender, initialIsBar);
   let total = rates.first30;
@@ -72,7 +119,6 @@ function calculate() {
 
   const after30 = new Date(startDate.getTime() + 30*60000);
 
-  // 以降は15分ごとに判定
   let blockStart = new Date(after30);
   while (blockStart < endDate) {
     let isBar = blockStart.getHours() >= 22;
@@ -84,6 +130,11 @@ function calculate() {
 
   out.innerText = `料金: ${total} 円`;
   bd.innerText = breakdown.join("\n");
+}
+
+// Service Worker 登録
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 </body>
