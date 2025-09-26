@@ -23,13 +23,16 @@
     padding: 18px;
   }
 
-  h2 {
-    font-family: "TanukiMagic", cursive;
-    color: #e75480; /* ローズピンク */
-    -webkit-text-stroke: 2px white; /* 白ふち */
-    font-size: 28px;
-    margin-bottom: 20px;
-  }
+ h2 {
+  font-family: "TanukiMagic", cursive;
+  color: #e75480;
+  font-size: 32px;
+  text-shadow: 
+    1px 1px 0 #fff,
+   -1px 1px 0 #fff,
+    1px -1px 0 #fff,
+   -1px -1px 0 #fff;
+}
 
   label, input, select, button {
     display: block;
@@ -139,3 +142,4 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
