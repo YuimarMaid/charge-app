@@ -23,15 +23,21 @@
     padding: 18px;
   }
 
- h2 {
+h2 {
   font-family: "TanukiMagic", cursive;
-  color: #e75480;
-  font-size: 32px;
+  color: #e75480; /* ローズピンク */
+  font-size: 36px;
+  font-weight: normal;
+
+  /* 縁取り → 半分の太さ */
+  -webkit-text-stroke: 1px white;
+
+  /* 疑似太字 → text-shadowを内側っぽく重ねる */
   text-shadow: 
-    1px 1px 0 #fff,
-   -1px 1px 0 #fff,
-    1px -1px 0 #fff,
-   -1px -1px 0 #fff;
+    0.5px 0 0 #e75480,
+   -0.5px 0 0 #e75480,
+    0 0.5px 0 #e75480,
+    0 -0.5px 0 #e75480;
 }
 
   label, input, select, button {
@@ -142,4 +148,5 @@ if ("serviceWorker" in navigator) {
 </script>
 </body>
 </html>
+
 
