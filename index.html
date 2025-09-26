@@ -30,18 +30,19 @@
       font-family: "TanukiMagic", cursive, sans-serif;
       font-size: 40px;
       font-weight: normal;
-      color: #e75480; /* ローズピンク */
+      color: #e75480; /* ピンク文字 */
+      display: inline-block;
       margin-bottom: 20px;
     }
 
     h2::before {
-      content: attr(data-text); /* 同じ文字をコピー */
+      content: attr(data-text);
       position: absolute;
       left: 0;
       top: 0;
       z-index: -1;
       color: white;
-      -webkit-text-stroke: 6px white; /* 白い縁取りを外側に */
+      -webkit-text-stroke: 6px white; /* 外側に白フチ */
     }
 
     label {
@@ -60,133 +61,4 @@
 
     button {
       background-color: #e75480;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      margin-top: 14px;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    #result {
-      margin-top: 20px;
-      font-size: 22px;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <h2 data-text="チャージ料金計算">チャージ料金計算</h2>
-
-  <label>性別
-    <select id="gender">
-      <option value="male">男性</option>
-      <option value="female">女性</option>
-    </select>
-  </label>
-
-  <label>入店時間
-    <input type="time" id="startTime" step="900">
-  </label>
-
-  <label>退店時間
-    <input type="time" id="endTime" step="900">
-  </label>
-
-  <button onclick="calculate()">計算する</button>
-
-  <div id="result"></div>
-
-  <script>
-    // ✅ 分を必ず 0,15,30,45 に丸める関数
-    function roundToQuarterHour(date) {
-      let minutes = date.getMinutes();
-      let rounded = Math.round(minutes / 15) * 15;
-      if (rounded === 60) {
-        date.setHours(date.getHours() + 1);
-        rounded = 0;
-      }
-      date.setMinutes(rounded);
-      date.setSeconds(0);
-      return date;
-    }
-
-    // 入力イベントで自動補正
-    document.getElementById("startTime").addEventListener("change", (e) => {
-      let date = new Date(`1970-01-01T${e.target.value}:00`);
-      e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
-    });
-
-    document.getElementById("endTime").addEventListener("change", (e) => {
-      let date = new Date(`1970-01-01T${e.target.value}:00`);
-      e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
-    });
-
-    // ✅ 計算ロジック
-    function calculate() {
-      const gender = document.getElementById("gender").value;
-      const start = document.getElementById("startTime").value;
-      const end = document.getElementById("endTime").value;
-
-      if (!start || !end) {
-        document.getElementById("result").textContent = "時間を入力してください";
-        return;
-      }
-
-      let startDate = new Date(`1970-01-01T${start}:00`);
-      let endDate = new Date(`1970-01-01T${end}:00`);
-      if (endDate <= startDate) {
-        document.getElementById("result").textContent = "退店時間は入店時間より後にしてください";
-        return;
-      }
-
-      // 分を丸める
-      startDate = roundToQuarterHour(startDate);
-      endDate = roundToQuarterHour(endDate);
-
-      let total = 0;
-      const cafeEnd = new Date("1970-01-01T22:00:00");
-
-      // まずカフェタイム
-      if (startDate < cafeEnd) {
-        let cafeExit = endDate < cafeEnd ? endDate : cafeEnd;
-        total += calcCharge(gender, "cafe", startDate, cafeExit);
-        startDate = cafeExit;
-      }
-
-      // 次にバータイム
-      if (endDate > cafeEnd) {
-        total += calcCharge(gender, "bar", startDate, endDate);
-      }
-
-      document.getElementById("result").textContent = `合計料金: ${total} 円`;
-    }
-
-    function calcCharge(gender, timeType, start, end) {
-      let minutes = (end - start) / 1000 / 60;
-      if (minutes <= 0) return 0;
-
-      let first30 = (timeType === "cafe")
-        ? 400
-        : 500;
-
-      let extendFee = (gender === "male")
-        ? (timeType === "cafe" ? 300 : 400)
-        : (timeType === "cafe" ? 200 : 300);
-
-      let total = first30;
-      minutes -= 30;
-
-      if (minutes > 0) {
-        let units = Math.ceil(minutes / 15);
-        total += units * extendFee;
-      }
-
-      return total;
-    }
-  </script>
-</body>
-</html>
+      color: white
