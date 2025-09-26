@@ -9,7 +9,6 @@
 <link rel="icon" href="icon-192.png">
 
 <style>
-  /* フォントを読み込む（tanuki-magic.woff を同じフォルダに置いてください） */
 @font-face {
   font-family: "TanukiMagic";
   src: url("Tanuki-Permanent-Marker.woff2") format("woff2"),
@@ -25,20 +24,21 @@ body {
 
 
 h2 {
+  position: relative;
   font-family: "TanukiMagic", cursive, sans-serif;
-  font-size: 36px;
+  font-size: 40px;
   font-weight: normal;
-  color: #e75480; /* ローズピンク */
+  color: #e75480; 
+}
 
-  text-shadow: 
-    1px 1px 0 #fff,
-   -1px 1px 0 #fff,
-    1px -1px 0 #fff,
-   -1px -1px 0 #fff,
-    0 1px 0 #fff,
-    1px 0 0 #fff,
-   -1px 0 0 #fff,
-    0 -1px 0 #fff;
+h2::before {
+  content: attr(data-text); 
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  color: white;
+  -webkit-text-stroke: 6px white; 
 }
 
   label, input, select, button {
@@ -147,8 +147,35 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("service-worker.js");
 }
 </script>
+
+  function roundToQuarterHour(date) {
+    let minutes = date.getMinutes();
+    let rounded = Math.round(minutes / 15) * 15;
+    if (rounded === 60) {
+      date.setHours(date.getHours() + 1);
+      rounded = 0;
+    }
+    date.setMinutes(rounded);
+    date.setSeconds(0);
+    return date;
+  }
+
+
+  document.getElementById("startTime").addEventListener("change", (e) => {
+    let date = new Date(`1970-01-01T${e.target.value}:00`);
+    e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
+  });
+
+  document.getElementById("endTime").addEventListener("change", (e) => {
+    let date = new Date(`1970-01-01T${e.target.value}:00`);
+    e.target.value = roundToQuarterHour(date).toTimeString().slice(0, 5);
+  });
+
+</script>
+  
 </body>
 </html>
+
 
 
 
