@@ -15,29 +15,39 @@
       padding: 0;
     }
     .logo {
-      margin-top: 20px;
+      margin: 20px auto;
       width: 90%;
       max-width: 400px;
       height: auto;
+      display: block;
     }
     .container {
-      margin: 20px;
+      margin: 20px auto;
       padding: 20px;
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 500px;
     }
-    label, select, input {
+    label {
       font-size: 18px;
-      margin: 10px 0;
+      margin-top: 10px;
       display: block;
+      text-align: left;
+    }
+    select, input {
+      font-size: 18px;
+      margin: 8px 0 20px 0;
+      padding: 5px;
+      width: 100%;
+      box-sizing: border-box;
     }
     button {
       background-color: #ff69b4;
       color: white;
       border: none;
       padding: 10px 20px;
-      margin-top: 20px;
+      margin-top: 10px;
       border-radius: 10px;
       font-size: 18px;
       cursor: pointer;
@@ -63,10 +73,10 @@
     </select>
 
     <label for="startTime">入店時刻:</label>
-    <input type="time" id="startTime" step="900"> <!-- 15分刻み -->
+    <input type="time" id="startTime" step="900">
 
     <label for="endTime">退店時刻:</label>
-    <input type="time" id="endTime" step="900"> <!-- 15分刻み -->
+    <input type="time" id="endTime" step="900">
 
     <button onclick="calculateCharge()">計算する</button>
 
