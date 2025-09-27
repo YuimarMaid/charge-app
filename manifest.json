@@ -1,10 +1,10 @@
 {
-  "name": "チャージ料金計算ツール",
+  "name": "チャージ料金計算",
   "short_name": "料金計算",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2196f3",
+  "background_color": "#f8c8dc",
+  "theme_color": "#f8c8dc",
   "icons": [
     {
       "src": "icon-192.png",
