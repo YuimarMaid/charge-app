@@ -1,11 +1,13 @@
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open("charge-calculator-v1").then((cache) => {
+self.addEventListener("install", e => {
+  e.waitUntil(
+    caches.open("charge-app-v3").then(cache => {
       return cache.addAll([
-        "index.html",
-        "manifest.json",
-        "icon-192.png",
-        "icon-512.png"
+        "./",
+        "./index.html",
+        "./manifest.json",
+        "./title.png",
+        "./icon-192.png",
+        "./icon-512.png"
       ]);
     })
   );
@@ -18,3 +20,4 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
