@@ -5,74 +5,75 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>チャージ料金計算</title>
 
-  <!-- manifest -->
+  <!-- PWA関連 -->
   <link rel="manifest" href="manifest.json">
-
-  <!-- Favicon と Apple Touch Icon を PWAアイコンと揃える -->
-  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="icon-192.png">
-
   <meta name="theme-color" content="#f8c8dc">
 
+  <!-- Favicon / アイコン設定 -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- CSS -->
   <style>
     body {
       font-family: sans-serif;
+      background-color: rgba(248, 200, 220, 0.8); /* 薄いピンク、透過20% */
       text-align: center;
-      background-color: rgba(255, 182, 193, 0.8); /* パステルピンク＋透過 */
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
     .logo {
-      margin: 20px auto;
-      width: 90%;
-      max-width: 400px;
-      height: auto;
-      display: block;
+      margin-top: 20px;
     }
     .container {
-      margin: 20px auto;
+      margin-top: 20px;
+      background: white;
+      border-radius: 12px;
       padding: 20px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-width: 500px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
     }
     label {
-      font-size: 18px;
-      margin-top: 10px;
       display: block;
-      text-align: left;
+      margin: 10px 0 5px;
+      font-weight: bold;
     }
-    select, input {
-      font-size: 18px;
-      margin: 8px 0 20px 0;
-      padding: 5px;
+    select, input, button {
+      margin: 5px 0 15px;
+      padding: 8px;
       width: 100%;
-      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
     }
     button {
-      background-color: #ff69b4;
+      background-color: #e75480;
       color: white;
       border: none;
-      padding: 10px 20px;
-      margin-top: 10px;
-      border-radius: 10px;
-      font-size: 18px;
+      font-weight: bold;
       cursor: pointer;
     }
     button:hover {
-      background-color: #ff1493;
+      background-color: #d74370;
     }
-    h2 {
+    .result {
+      margin-top: 15px;
+      font-size: 20px;
+      font-weight: bold;
       color: #333;
-      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <!-- ロゴは画面上の表示だけ -->
-  <img src="title.png?v=5" alt="チャージ料金計算" class="logo">
+  <!-- ロゴ -->
+  <div class="logo">
+    <img src="title.png" alt="チャージ料金計算" width="280">
+  </div>
 
+  <!-- メインUI -->
   <div class="container">
     <label for="gender">性別:</label>
     <select id="gender">
@@ -80,17 +81,18 @@
       <option value="female">女性</option>
     </select>
 
-    <label for="startTime">入店時刻:</label>
+    <label for="startTime">入店時間:</label>
     <input type="time" id="startTime" step="900">
 
-    <label for="endTime">退店時刻:</label>
+    <label for="endTime">退店時間:</label>
     <input type="time" id="endTime" step="900">
 
     <button onclick="calculateCharge()">計算する</button>
 
-    <h2 id="result"></h2>
+    <div class="result" id="result"></div>
   </div>
 
+  <!-- JS -->
   <script>
     function calculateCharge() {
       const gender = document.getElementById("gender").value;
@@ -98,49 +100,43 @@
       const endTime = document.getElementById("endTime").value;
 
       if (!startTime || !endTime) {
-        document.getElementById("result").innerText = "入店時刻と退店時刻を入力してください";
+        document.getElementById("result").textContent = "時間を入力してください。";
         return;
       }
 
-      const start = new Date(`1970-01-01T${startTime}:00`);
-      const end = new Date(`1970-01-01T${endTime}:00`);
-
+      const start = new Date("1970-01-01T" + startTime + ":00");
+      const end = new Date("1970-01-01T" + endTime + ":00");
       if (end <= start) {
-        document.getElementById("result").innerText = "退店時刻は入店時刻より後にしてください";
+        document.getElementById("result").textContent = "退店時間は入店時間より後にしてください。";
         return;
       }
 
-      let total = 0;
-      let current = new Date(start);
+      const barTime = new Date("1970-01-01T22:00:00");
+      let charge = 0;
 
-      while (current < end) {
-        const isCafeTime = current.getHours() < 22;
-        let charge = 0;
-
-        if (gender === "male") {
-          if (isCafeTime) {
-            charge = (current.getTime() === start.getTime()) ? 400 : 300;
-          } else {
-            charge = (current.getTime() === start.getTime()) ? 500 : 400;
-          }
-        } else {
-          if (isCafeTime) {
-            charge = (current.getTime() === start.getTime()) ? 400 : 200;
-          } else {
-            charge = (current.getTime() === start.getTime()) ? 500 : 300;
-          }
-        }
-
-        total += charge;
-
-        if (current.getTime() === start.getTime()) {
-          current.setMinutes(current.getMinutes() + 30);
-        } else {
-          current.setMinutes(current.getMinutes() + 15);
+      // カフェタイム（22:00まで）
+      if (start < barTime) {
+        const cafeEnd = end < barTime ? end : barTime;
+        charge += gender === "male" ? 400 : 400;
+        const cafeMinutes = (cafeEnd - start) / 60000 - 30;
+        if (cafeMinutes > 0) {
+          const unit = Math.ceil(cafeMinutes / 15);
+          charge += unit * (gender === "male" ? 300 : 200);
         }
       }
 
-      document.getElementById("result").innerText = `合計料金: ${total}円`;
+      // バータイム（22:00以降）
+      if (end > barTime) {
+        const barStart = start < barTime ? barTime : start;
+        charge += gender === "male" ? 500 : 500;
+        const barMinutes = (end - barStart) / 60000 - 30;
+        if (barMinutes > 0) {
+          const unit = Math.ceil(barMinutes / 15);
+          charge += unit * (gender === "male" ? 400 : 300);
+        }
+      }
+
+      document.getElementById("result").textContent = `合計料金: ${charge}円`;
     }
   </script>
 </body>
