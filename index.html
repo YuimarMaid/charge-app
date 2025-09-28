@@ -37,16 +37,21 @@
     select,
     input[type="time"],
     button {
-      width:100%;
-      padding: 8px 36px 8px 8px;
-      margin-top:8px;
-      font-size:16px;
-      border-radius:8px;
-      border:1px solid #ccc;
-      background-clip: padding-box;
+    width: 100%;
+    padding: 8px 12px;      /* ← 左右の余白を12pxに増やす（約1文字分） */
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-clip: padding-box;
     }
 
-    select { -webkit-appearance: menulist-button; appearance: menulist-button; }
+    /* selectの▼が枠の中で揃うように */
+    select {
+    padding-right: 36px;    /* ← 時計アイコンと同じくらい右側に余裕を持たせる */
+    -webkit-appearance: menulist-button;
+    appearance: menulist-button;
+    }
+
 
     button {
       background:#e75480;
@@ -155,3 +160,4 @@
   </script>
 </body>
 </html>
+
