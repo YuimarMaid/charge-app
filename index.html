@@ -14,7 +14,6 @@
   <link rel="apple-touch-icon" href="android-chrome-192x192.png">
 
   <style>
-    /* 全体 */
     * { box-sizing: border-box; }
     body {
       font-family: sans-serif;
@@ -23,7 +22,6 @@
       padding: 20px;
       text-align: center;
     }
-
     .container {
       max-width: 420px;
       margin: 0 auto;
@@ -32,17 +30,15 @@
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
-
     .title-logo { max-width:100%; height:auto; margin-bottom:14px; }
 
     label { display:block; text-align:left; margin-top:10px; font-weight:600; }
 
-    /* ここが重要：select と time に同じ右パディングを付ける */
     select,
     input[type="time"],
     button {
       width:100%;
-      padding: 8px 36px 8px 8px; /* ← 右側に 36px の余白（時計や矢印のため） */
+      padding: 8px 36px 8px 8px;
       margin-top:8px;
       font-size:16px;
       border-radius:8px;
@@ -50,13 +46,7 @@
       background-clip: padding-box;
     }
 
-    /* ブラウザ標準の見た目は残す（時計アイコンを非表示にしない） */
     select { -webkit-appearance: menulist-button; appearance: menulist-button; }
-
-    /* iOS/Chrome 系での時計アイコンの微調整（位置調整） */
-    input[type="time"]::-webkit-calendar-picker-indicator {
-      /* 何もしない（表示はそのまま） — ただし内部で右パディングに収まる */
-    }
 
     button {
       background:#e75480;
@@ -73,12 +63,12 @@
 </head>
 <body>
   <div class="container">
-    <img src="title.png?v=8" alt="チャージ料金計算" class="title-logo">
+    <img src="title.png?v=9" alt="チャージ料金計算" class="title-logo">
 
     <label for="gender">性別</label>
     <select id="gender">
-    <option value="male">男性</option>
-    <option value="female">女性</option>
+      <option value="male">男性</option>
+      <option value="female">女性</option>
     </select>
 
     <label for="startTime">入店時刻</label>
@@ -86,7 +76,6 @@
 
     <label for="endTime">退店時刻</label>
     <input type="time" id="endTime" step="300">
-
 
     <button id="calcBtn">計算する</button>
 
@@ -113,7 +102,7 @@
       if(s !== v) el.value = s;
     }
 
-    // イベント
+    // 入力欄の丸め処理
     ['startTime','endTime'].forEach(id=>{
       const el = document.getElementById(id);
       if(!el) return;
@@ -126,12 +115,11 @@
       });
     });
 
-    // 料金計算（従来ルール）
+    // 料金計算ルール
     function getRates(gender,isBar){
       if(gender==='male') return isBar?{first30:500,add15:400}:{first30:400,add15:300};
       return isBar?{first30:500,add15:300}:{first30:400,add15:200};
     }
-
     function calculateByRules(gender,startStr,endStr){
       const start = new Date('2000-01-01T'+startStr+':00');
       const end = new Date('2000-01-01T'+endStr+':00');
@@ -150,8 +138,8 @@
       return {ok:true,total};
     }
 
+    // ボタンイベント
     document.getElementById('calcBtn').addEventListener('click', ()=>{
-      // 強制丸めしてから計算
       snapAndSetInput(document.getElementById('startTime'));
       snapAndSetInput(document.getElementById('endTime'));
       const startVal = document.getElementById('startTime').value;
@@ -167,4 +155,3 @@
   </script>
 </body>
 </html>
-
