@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>チャージ料金計算</title>
 
-  <!-- PWA関連 -->
+  <!-- PWA / icons -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#f8c8dc">
-
-  <!-- Favicon / アイコン関連 -->
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="icon" type="image/png" sizes="192x192" href="android-chrome-192x192.png">
@@ -19,127 +17,161 @@
     body {
       font-family: sans-serif;
       background-color: rgba(248, 200, 220, 0.8);
-      text-align: center;
       margin: 0;
       padding: 20px;
+      text-align: center;
     }
-    .logo { margin-top: 20px; }
+    .logo { margin-top: 10px; }
     .container {
-      margin-top: 20px;
-      background: white;
+      margin: 18px auto;
+      background: #fff;
       border-radius: 12px;
-      padding: 20px;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+      padding: 18px;
+      max-width: 420px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
-    label { display: block; margin: 10px 0 5px; font-weight: bold; }
-    select, input, button {
-      margin: 5px 0 15px;
-      padding: 8px;
+    label {
+      display:block;
+      text-align:left;
+      margin-top:12px;
+      font-weight:600;
+    }
+    select, input[type="time"], button {
       width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      max-width: 100%;
+      padding: 8px;
+      margin-top: 8px;
       font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-sizing: border-box; /* ←ズレ防止 */
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    /* 入退店時間の時計アイコンを微調整 */
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      margin-right: -4px;
     }
     button {
-      background-color: #e75480;
-      color: white;
+      background: #e75480;
+      color: #fff;
       border: none;
-      font-weight: bold;
       cursor: pointer;
+      font-weight: 700;
+      margin-top: 14px;
     }
-    button:hover { background-color: #d74370; }
-    .result { margin-top: 15px; font-size: 20px; font-weight: bold; color: #333; }
+    button:active { transform: translateY(1px); }
+    .result {
+      margin-top: 16px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
+    small.hint {
+      display:block;
+      margin-top:8px;
+      color:#666;
+      font-size:13px;
+      text-align:left;
+    }
   </style>
 </head>
 <body>
   <div class="logo">
-    <img src="title.png" alt="チャージ料金計算" width="280">
+    <img src="title.png?v=7" alt="チャージ料金計算" width="280" style="max-width:90%; height:auto;">
   </div>
 
   <div class="container">
-    <label for="gender">性別:</label>
+    <label for="gender">性別</label>
     <select id="gender">
       <option value="male">男性</option>
       <option value="female">女性</option>
     </select>
 
-    <label for="startTime">入店時間:</label>
-    <input type="time" id="startTime" step="300">
+    <label for="startTime">入店時間</label>
+    <input type="time" id="startTime" step="300" />
 
-    <label for="endTime">退店時間:</label>
-    <input type="time" id="endTime" step="300">
+    <label for="endTime">退店時間</label>
+    <input type="time" id="endTime" step="300" />
 
-    <button onclick="calculateCharge()">計算する</button>
-
+    <button id="calcBtn">計算する</button>
     <div class="result" id="result"></div>
+    <small class="hint">※ 時刻は自動で5分単位に丸められます。料金は最初の30分 + 以降15分単位で計算。</small>
   </div>
 
   <script>
-    // 時刻を5分単位に丸める関数
-    function roundToFiveMinutes(date) {
-      let minutes = date.getMinutes();
-      let rounded = Math.round(minutes / 5) * 5;
-      if (rounded === 60) {
-        date.setHours(date.getHours() + 1);
-        rounded = 0;
-      }
-      date.setMinutes(rounded);
-      date.setSeconds(0);
-      return date;
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function snapTo5Min(timeStr) {
+      if (!timeStr) return timeStr;
+      const parts = timeStr.split(':');
+      if (parts.length < 2) return timeStr;
+      let h = parseInt(parts[0],10) || 0;
+      let m = parseInt(parts[1],10) || 0;
+      let total = h*60 + m;
+      let snapped = Math.round(total / 5) * 5;
+      snapped = ((snapped % (24*60)) + (24*60)) % (24*60);
+      let nh = Math.floor(snapped / 60);
+      let nm = snapped % 60;
+      return pad(nh) + ':' + pad(nm);
     }
-
-    function calculateCharge() {
-      const gender = document.getElementById("gender").value;
-      const startTime = document.getElementById("startTime").value;
-      const endTime = document.getElementById("endTime").value;
-
-      if (!startTime || !endTime) {
-        document.getElementById("result").textContent = "時間を入力してください。";
+    function snapAndSetInput(el) {
+      if (!el) return;
+      const v = el.value;
+      if (!v) return;
+      const snapped = snapTo5Min(v);
+      if (snapped !== v) el.value = snapped;
+    }
+    function attachRounding(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      let timer = null;
+      const doSnap = () => snapAndSetInput(el);
+      el.addEventListener('blur', doSnap);
+      el.addEventListener('change', doSnap);
+      el.addEventListener('input', () => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(doSnap, 300);
+      });
+    }
+    function getRates(gender, isBar){
+      if (gender === 'male'){
+        return isBar ? { first30:500, add15:400 } : { first30:400, add15:300 };
+      } else {
+        return isBar ? { first30:500, add15:300 } : { first30:400, add15:200 };
+      }
+    }
+    function calculateByRules(gender, startStr, endStr) {
+      const start = new Date('2000-01-01T' + startStr + ':00');
+      const end = new Date('2000-01-01T' + endStr + ':00');
+      if (end <= start) return { ok:false, msg:'退店時間は入店時間より後にしてください' };
+      const initialIsBar = start.getHours() >= 22;
+      let total = getRates(gender, initialIsBar).first30;
+      const diffMin = Math.ceil((end - start) / 60000);
+      if (diffMin <= 30) return { ok:true, total: total };
+      let remaining = diffMin - 30;
+      const blocks = Math.ceil(remaining / 15);
+      for (let i=0;i<blocks;i++){
+        const blockStart = new Date(start.getTime() + (30 + i*15) * 60000);
+        const isBar = blockStart.getHours() >= 22;
+        total += getRates(gender,isBar).add15;
+      }
+      return { ok:true, total: total };
+    }
+    attachRounding('startTime');
+    attachRounding('endTime');
+    document.getElementById('calcBtn').addEventListener('click', function(){
+      snapAndSetInput(document.getElementById('startTime'));
+      snapAndSetInput(document.getElementById('endTime'));
+      const startVal = document.getElementById('startTime').value;
+      const endVal   = document.getElementById('endTime').value;
+      const gender   = document.getElementById('gender').value;
+      if (!startVal || !endVal) {
+        document.getElementById('result').innerText = '入店・退店時間を入力してください。';
         return;
       }
-
-      let start = new Date("1970-01-01T" + startTime + ":00");
-      let end = new Date("1970-01-01T" + endTime + ":00");
-
-      // 5分単位に丸め
-      start = roundToFiveMinutes(start);
-      end = roundToFiveMinutes(end);
-
-      if (end <= start) {
-        document.getElementById("result").textContent = "退店時間は入店時間より後にしてください。";
-        return;
-      }
-
-      const barTime = new Date("1970-01-01T22:00:00");
-      let charge = 0;
-
-      // カフェタイム
-      if (start < barTime) {
-        const cafeEnd = end < barTime ? end : barTime;
-        charge += 400; // 最初の30分
-        const cafeMinutes = (cafeEnd - start) / 60000 - 30;
-        if (cafeMinutes > 0) {
-          const unit = Math.ceil(cafeMinutes / 15);
-          charge += unit * (gender === "male" ? 300 : 200);
-        }
-      }
-
-      // バータイム
-      if (end > barTime) {
-        const barStart = start < barTime ? barTime : start;
-        charge += 500; // 最初の30分
-        const barMinutes = (end - barStart) / 60000 - 30;
-        if (barMinutes > 0) {
-          const unit = Math.ceil(barMinutes / 15);
-          charge += unit * (gender === "male" ? 400 : 300);
-        }
-      }
-
-      document.getElementById("result").textContent = `合計料金: ${charge}円`;
-    }
+      const res = calculateByRules(gender, startVal, endVal);
+      document.getElementById('result').innerText = res.ok ? `合計料金: ${res.total}円` : res.msg;
+    });
   </script>
 </body>
 </html>
