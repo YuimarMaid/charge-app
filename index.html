@@ -163,18 +163,18 @@
     <!-- ページ下部に追加 -->
     <button id="updateBtn">最新版にアップロード！</button>
 
-<script>
-document.getElementById('updateBtn').addEventListener('click', () => {
-  // キャッシュを無視して強制リロード
-  location.reload(true); 
-  // ↑ true は最近のブラウザでは無視されることが多いので、
-  // クエリ付きで再読み込みさせる方が確実です
-  // location.href = location.pathname + '?v=' + Date.now();
-});
+    document.getElementById('updateBtn').addEventListener('click', () => {
+    // キャッシュを無視して強制リロード
+    location.reload(true); 
+    // ↑ true は最近のブラウザでは無視されることが多いので、
+    // クエリ付きで再読み込みさせる方が確実です
+    // location.href = location.pathname + '?v=' + Date.now();
+    });
 </script>
 
 </body>
 </html>
+
 
 
 
