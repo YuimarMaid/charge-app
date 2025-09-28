@@ -37,21 +37,24 @@
       font-weight:600;
     }
     select, input[type="time"], button {
-      width: 100%;
-      max-width: 100%;
-      padding: 8px;
-      margin-top: 8px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box; /* ←ズレ防止 */
-      -webkit-appearance: none;
-      appearance: none;
-    }
-    /* 入退店時間の時計アイコンを微調整 */
-    input[type="time"]::-webkit-calendar-picker-indicator {
-      margin-right: -4px;
-    }
+  width: 100%;
+  max-width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* 入退店時間の時計アイコンを消す */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
     button {
       background: #e75480;
       color: #fff;
@@ -175,3 +178,4 @@
   </script>
 </body>
 </html>
+
