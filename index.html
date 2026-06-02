@@ -158,10 +158,10 @@
     }
 
     // Bar料金の時間帯判定
-    // 22:00〜翌6:00をBar料金として扱う
+    // 22:00〜翌10:00をBar料金として扱う
     function isBarTime(dateObj){
       const hour = dateObj.getHours();
-      return hour >= 22 || hour < 6;
+      return hour >= 22 || hour < 10;
     }
 
     // 料金計算
