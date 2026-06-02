@@ -15,6 +15,7 @@
 
   <style>
     * { box-sizing: border-box; }
+
     body {
       font-family: sans-serif;
       background-color: rgba(248,200,220,0.8);
@@ -22,6 +23,7 @@
       padding: 20px;
       text-align: center;
     }
+
     .container {
       max-width: 420px;
       margin: 0 auto;
@@ -30,37 +32,59 @@
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     }
-    .title-logo { max-width:100%; height:auto; margin-bottom:14px; }
 
-    label { display:block; text-align:left; margin-top:10px; font-weight:600; }
+    .title-logo {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      text-align: left;
+      margin-top: 10px;
+      font-weight: 600;
+    }
 
     select,
     input[type="time"],
     button {
-      width:100%;
+      width: 100%;
       padding: 8px 36px 8px 8px;
-      margin-top:8px;
-      font-size:16px;
-      border-radius:8px;
-      border:1px solid #ccc;
+      margin-top: 8px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
       background-clip: padding-box;
     }
 
-    select { -webkit-appearance: menulist-button; appearance: menulist-button; }
+    select {
+      -webkit-appearance: menulist-button;
+      appearance: menulist-button;
+    }
 
     button {
-      background:#e75480;
-      color:#fff;
-      border:none;
-      font-weight:700;
-      cursor:pointer;
-      margin-top:14px;
+      background: #e75480;
+      color: #fff;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 14px;
     }
-    button:hover { opacity:0.95; }
 
-    #result { margin-top:16px; font-size:20px; font-weight:700; color:#333; }
+    button:hover {
+      opacity: 0.95;
+    }
+
+    #result {
+      margin-top: 16px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
+    }
   </style>
 </head>
+
 <body>
   <div class="container">
     <img src="title.png?v=9" alt="チャージ料金計算" class="title-logo">
@@ -83,143 +107,151 @@
   </div>
 
   <script>
-    // ヘルパー
-    function pad(n){ return String(n).padStart(2,'0'); }
+    // 2桁表示にする
+    function pad(n){
+      return String(n).padStart(2, '0');
+    }
+
+    // 入力時刻を5分単位に丸める
     function snapTo5Min(timeStr) {
       if (!timeStr) return timeStr;
-      const [hh,mm] = timeStr.split(':').map(x=>parseInt(x,10)||0);
-      let total = hh*60 + mm;
+
+      const parts = timeStr.split(':');
+      const hh = parseInt(parts[0], 10) || 0;
+      const mm = parseInt(parts[1], 10) || 0;
+
+      let total = hh * 60 + mm;
       let snapped = Math.round(total / 5) * 5;
-      snapped = ((snapped % (24*60)) + (24*60)) % (24*60);
-      const nh = Math.floor(snapped/60), nm = snapped%60;
-      return pad(nh)+':'+pad(nm);
+
+      snapped = ((snapped % (24 * 60)) + (24 * 60)) % (24 * 60);
+
+      const nh = Math.floor(snapped / 60);
+      const nm = snapped % 60;
+
+      return pad(nh) + ':' + pad(nm);
     }
+
+    // 入力欄の値を5分単位に丸めて反映する
     function snapAndSetInput(el){
-      if(!el) return;
+      if (!el) return;
+
       const v = el.value;
-      if(!v) return;
+      if (!v) return;
+
       const s = snapTo5Min(v);
-      if(s !== v) el.value = s;
+      if (s !== v) {
+        el.value = s;
+      }
     }
 
-    // 入力欄の丸め処理
-    ['startTime','endTime'].forEach(id=>{
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.addEventListener('blur', ()=>snapAndSetInput(el));
-      el.addEventListener('change', ()=>snapAndSetInput(el));
-      let t=null;
-      el.addEventListener('input', ()=>{
-        if(t) clearTimeout(t);
-        t = setTimeout(()=>snapAndSetInput(el), 250);
-      });
-    });
+    // 料金表
+    function getRates(gender, isBar){
+      if (gender === 'male') {
+        return isBar
+          ? { first30: 500, add15: 400 }
+          : { first30: 400, add15: 300 };
+      }
 
-    // 料金計算ルール
-    function getRates(gender,isBar){
-      if(gender==='male') return isBar?{first30:500,add15:400}:{first30:400,add15:300};
-      return isBar?{first30:500,add15:300}:{first30:400,add15:200};
-    }
-    <script>
-    // ヘルパー
-    function pad(n){ return String(n).padStart(2,'0'); }
-    function snapTo5Min(timeStr) {
-      if (!timeStr) return timeStr;
-      const [hh,mm] = timeStr.split(':').map(x=>parseInt(x,10)||0);
-      let total = hh*60 + mm;
-      let snapped = Math.round(total / 5) * 5;
-      snapped = ((snapped % (24*60)) + (24*60)) % (24*60);
-      const nh = Math.floor(snapped/60), nm = snapped%60;
-      return pad(nh)+':'+pad(nm);
-    }
-    function snapAndSetInput(el){
-      if(!el) return;
-      const v = el.value;
-      if(!v) return;
-      const s = snapTo5Min(v);
-      if(s !== v) el.value = s;
+      return isBar
+        ? { first30: 500, add15: 300 }
+        : { first30: 400, add15: 200 };
     }
 
-    // 入力欄の丸め処理
-    ['startTime','endTime'].forEach(id=>{
-      const el = document.getElementById(id);
-      if(!el) return;
-      el.addEventListener('blur', ()=>snapAndSetInput(el));
-      el.addEventListener('change', ()=>snapAndSetInput(el));
-      let t=null;
-      el.addEventListener('input', ()=>{
-        if(t) clearTimeout(t);
-        t = setTimeout(()=>snapAndSetInput(el), 250);
-      });
-    });
-
-    // 料金計算ルール
-    function getRates(gender,isBar){
-      if(gender==='male') return isBar?{first30:500,add15:400}:{first30:400,add15:300};
-      return isBar?{first30:500,add15:300}:{first30:400,add15:200};
+    // Bar料金の時間帯判定
+    // 22:00〜翌6:00をBar料金として扱う
+    function isBarTime(dateObj){
+      const hour = dateObj.getHours();
+      return hour >= 22 || hour < 6;
     }
 
-    function calculateByRules(gender,startStr,endStr){
+    // 料金計算
+    function calculateByRules(gender, startStr, endStr){
       const start = new Date('2000-01-01T' + startStr + ':00');
       const end = new Date('2000-01-01T' + endStr + ':00');
 
-      // 退店時刻が入店時刻以下の場合は、翌日退店として扱う
-      if(end <= start){
+      // 日付を跨いだ場合は、退店時刻を翌日として扱う
+      if (end <= start) {
         end.setDate(end.getDate() + 1);
       }
 
-      const initialIsBar = start.getHours() >= 22;
-      let total = getRates(gender,initialIsBar).first30;
-
       const diffMin = Math.ceil((end - start) / 60000);
 
-      if(diffMin <= 30) return {ok:true,total};
+      // 念のため、異常な値を弾く
+      if (diffMin <= 0) {
+        return {
+          ok: false,
+          msg: '退店時刻は入店時刻より後にしてください。'
+        };
+      }
 
-      let remaining = diffMin - 30;
+      // 最初の30分
+      let total = getRates(gender, isBarTime(start)).first30;
+
+      if (diffMin <= 30) {
+        return {
+          ok: true,
+          total: total
+        };
+      }
+
+      // 30分を超えた分を15分単位で加算
+      const remaining = diffMin - 30;
       const blocks = Math.ceil(remaining / 15);
 
-      for(let i=0;i<blocks;i++){
-        const blockStart = new Date(start.getTime() + (30 + i*15) * 60000);
-
-        // 22:00〜翌6:00をBar料金として扱う
-        const hour = blockStart.getHours();
-        const isBar = hour >= 22 || hour < 6;
-
-        total += getRates(gender,isBar).add15;
+      for (let i = 0; i < blocks; i++) {
+        const blockStart = new Date(start.getTime() + (30 + i * 15) * 60000);
+        total += getRates(gender, isBarTime(blockStart)).add15;
       }
 
-      return {ok:true,total};
+      return {
+        ok: true,
+        total: total
+      };
     }
 
-    // ボタンイベント
-    document.getElementById('calcBtn').addEventListener('click', ()=>{
-      snapAndSetInput(document.getElementById('startTime'));
-      snapAndSetInput(document.getElementById('endTime'));
-      const startVal = document.getElementById('startTime').value;
-      const endVal = document.getElementById('endTime').value;
-      const gender = document.getElementById('gender').value;
-      if(!startVal || !endVal){
-        document.getElementById('result').innerText = '入店時刻と退店時刻を入力してください。';
-        return;
-      }
-      const res = calculateByRules(gender,startVal,endVal);
-      document.getElementById('result').innerText = res.ok ? `合計料金: ${res.total}円` : res.msg;
+    // 入力欄の丸め処理
+    ['startTime', 'endTime'].forEach(function(id){
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      el.addEventListener('blur', function(){
+        snapAndSetInput(el);
+      });
+
+      el.addEventListener('change', function(){
+        snapAndSetInput(el);
+      });
+
+      let timer = null;
+
+      el.addEventListener('input', function(){
+        if (timer) clearTimeout(timer);
+
+        timer = setTimeout(function(){
+          snapAndSetInput(el);
+        }, 250);
+      });
     });
-  </script>
 
     // ボタンイベント
-    document.getElementById('calcBtn').addEventListener('click', ()=>{
+    document.getElementById('calcBtn').addEventListener('click', function(){
       snapAndSetInput(document.getElementById('startTime'));
       snapAndSetInput(document.getElementById('endTime'));
+
       const startVal = document.getElementById('startTime').value;
       const endVal = document.getElementById('endTime').value;
       const gender = document.getElementById('gender').value;
-      if(!startVal || !endVal){
+
+      if (!startVal || !endVal) {
         document.getElementById('result').innerText = '入店時刻と退店時刻を入力してください。';
         return;
       }
-      const res = calculateByRules(gender,startVal,endVal);
-      document.getElementById('result').innerText = res.ok ? `合計料金: ${res.total}円` : res.msg;
+
+      const res = calculateByRules(gender, startVal, endVal);
+
+      document.getElementById('result').innerText = res.ok
+        ? '合計料金: ' + res.total + '円'
+        : res.msg;
     });
   </script>
 </body>
